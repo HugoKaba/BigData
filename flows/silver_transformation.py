@@ -51,14 +51,23 @@ def load_to_silver(df: pd.DataFrame, object_name: str):
         length=len(parquet_data)
     )
 
+@task(name="join_clients_achats")
+def join_clients_achats(df_clients: pd.DataFrame, df_achats: pd.DataFrame) -> pd.DataFrame:
+    """Join clients and purchases to create a denormalized table for ML."""
+    return df_achats.merge(df_clients, on="id_client", how="inner")
+
 @flow(name="Silver Transformation Flow")
 def silver_transformation_flow():
     df_clients = extract_from_bronze("clients.csv")
     df_clients_clean = transform_clients(df_clients)
     load_to_silver(df_clients_clean, "clients.csv")
+    
     df_achats = extract_from_bronze("achats.csv")
     df_achats_clean = transform_achats(df_achats)
     load_to_silver(df_achats_clean, "achats.csv")
+    
+    df_denormalized = join_clients_achats(df_clients_clean, df_achats_clean)
+    load_to_silver(df_denormalized, "denormalized_achats.parquet")
 
 if __name__ == "__main__":
     silver_transformation_flow()

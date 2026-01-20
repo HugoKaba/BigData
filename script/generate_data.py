@@ -94,13 +94,13 @@ if __name__ == "__main__":
     output_dir = Path(__file__).parent.parent / "data" / "sources"
 
     clients_ids = generate_clients(
-        n_clients= 1500,
+        n_clients= 5000,
         output_path=str(output_dir / "clients.csv")
     )
 
     generate_achats(
         client_ids=clients_ids,
-        avg_purchases_per_client=15,
+        avg_purchases_per_client=30,
         output_path=str(output_dir / "achats.csv")
     )
 

@@ -1,7 +1,6 @@
 import sys
 from pathlib import Path
 
-# Add flows directory to path to import config
 sys.path.append(str(Path(__file__).parent.parent / "flows"))
 
 from config import get_minio_client, BUCKET_SOURCES, BUCKET_BRONZE, BUCKET_SILVER, BUCKET_GOLD
