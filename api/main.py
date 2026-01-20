@@ -1,7 +1,7 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from pymongo import MongoClient
 import os
-from typing import List, Dict, Any
+import math
 
 app = FastAPI(title="Big Data API", description="API exposing Gold layer data from MongoDB")
 
@@ -12,6 +12,13 @@ def get_db():
     client = MongoClient(MONGO_URI)
     return client[DB_NAME]
 
+def clean_nan(data):
+    for record in data:
+        for key, value in record.items():
+            if isinstance(value, float) and math.isnan(value):
+                record[key] = None
+    return data
+
 @app.get("/")
 def read_root():
     return {"status": "online", "message": "Welcome to the Big Data Analytics API"}
@@ -20,28 +27,28 @@ def read_root():
 def get_ca_pays():
     db = get_db()
     data = list(db["kpi_ca_pays"].find({}, {"_id": 0}))
-    return data
+    return clean_nan(data)
 
 @app.get("/stats/vol_mensuel")
 def get_vol_mensuel():
     db = get_db()
     data = list(db["kpi_vol_mensuel"].find({}, {"_id": 0}))
-    return data
+    return clean_nan(data)
 
 @app.get("/stats/ca_mensuel")
 def get_ca_mensuel():
     db = get_db()
     data = list(db["kpi_ca_mensuel"].find({}, {"_id": 0}))
-    return data
+    return clean_nan(data)
 
 @app.get("/stats/top_produits")
 def get_top_produits():
     db = get_db()
     data = list(db["kpi_top_produits"].find({}, {"_id": 0}).limit(10))
-    return data
+    return clean_nan(data)
 
 @app.get("/stats/clients")
 def get_client_stats():
     db = get_db()
     data = list(db["kpi_stats_clients"].find({}, {"_id": 0}).limit(100))
-    return data
+    return clean_nan(data)

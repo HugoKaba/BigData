@@ -6,10 +6,8 @@ faker
 streamlit
 plotly
 python-dotenv
-scikit-learn
-pyspark
 pymongo
 fastapi
 uvicorn
 kafka-python
-delta-spark
+requests

@@ -67,9 +67,11 @@ with col4:
     data_ca, latency = fetch_data("stats/ca_mensuel")
     if data_ca:
         df_ca = pd.DataFrame(data_ca)
+        df_ca['croissance_mom'] = df_ca['croissance_mom'].fillna(0)
         st.caption(f"Latency: {latency:.4f}s")
         fig = px.bar(df_ca, x='mois', y='croissance_mom', 
                      color='croissance_mom', 
                      title="Croissance MoM (%)",
                      color_continuous_scale=px.colors.diverging.RdYlGn)
         st.plotly_chart(fig, use_container_width=True)
+

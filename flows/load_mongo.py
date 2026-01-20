@@ -33,6 +33,15 @@ def load_collection(collection_name: str, parquet_file: str):
             
         full_df = pd.concat(dfs, ignore_index=True)
         
+        for col in full_df.columns:
+            if full_df[col].dtype == 'object' or 'date' in col.lower():
+                try:
+                    full_df[col] = pd.to_datetime(full_df[col], errors='ignore')
+                except:
+                    pass
+            if pd.api.types.is_datetime64_any_dtype(full_df[col]):
+                full_df[col] = full_df[col].astype(str)
+        
         db = get_mongo_db()
         collection = db[collection_name]
         collection.drop() 
@@ -43,6 +52,7 @@ def load_collection(collection_name: str, parquet_file: str):
             print(f"Inserted {len(records)} records into {collection_name}")
         else:
             print(f"No records to insert for {collection_name}")
+
 
     except Exception as e:
         print(f"Error loading {parquet_file} to Mongo: {e}")

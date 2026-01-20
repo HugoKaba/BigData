@@ -1,46 +1,20 @@
 from io import BytesIO
 from pathlib import Path
-
 from prefect import flow, task
-
 from config import BUCKET_BRONZE, BUCKET_SOURCES, get_minio_client
 
 @task(name="upload_to_sources", retries=2)
 def upload_csv_to_souces(file_path: str, object_name: str) -> str:
-    """
-    Upload local CSV file to MinIO sources bucket.
-
-    Args:
-        file_path: Path to local CSV file
-        object_name: Name of object in MinIO
-
-    Returns:
-        Object name in MinIO
-    """
-
     client = get_minio_client()
-
     if not client.bucket_exists(BUCKET_SOURCES):
         client.make_bucket(BUCKET_SOURCES)
-
     client.fput_object(BUCKET_SOURCES, object_name, file_path)
     print(f"Uploaded {object_name} to {BUCKET_SOURCES}")
     return object_name
 
 @task(name="copy_to_bronze", retries=2)
 def copy_to_bronze_layer(object_name: str) -> str:
-    """
-    Copy data from sources to bronze bucket (raw data lake layer).
-
-    Args:
-        object_name: Name of object to copy
-
-    Returns:
-        Object name in bronze layer
-    """
-
     client = get_minio_client()
-
     if not client.bucket_exists(BUCKET_BRONZE):
         client.make_bucket(BUCKET_BRONZE)
     
@@ -59,16 +33,7 @@ def copy_to_bronze_layer(object_name: str) -> str:
     return object_name
 
 @flow(name="Bronze Ingestion Flow")
-def bronze_ingestion_flow(data_dir: str = "./data/sources") -> dict:
-    """
-    Main flow: Upload CSV files to sources and copy to bronze layer.
-
-    Args:
-        data_dir: Directory containing source CSV files
-
-    Returns:
-        Dictionary with ingested file names
-    """
+def bronze_ingestion_flow(data_dir: str = "./script/data/sources") -> dict:
     data_path = Path(data_dir)
 
     clients_file = str(data_path / "clients.csv")
